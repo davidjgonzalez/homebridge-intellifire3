@@ -1,0 +1,161 @@
+<div class="card card-body mb-3">
+    <h5 class="card-title">Authentication</h5>
+    <p class="text-muted small mb-3">Use the same username and password you use to log in to the Intellifire app.</p>
+    <form id="authForm">
+        <div class="mb-3">
+            <label class="form-label" for="username">Username</label>
+            <input class="form-control" type="email" id="username"/>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <input class="form-control" type="password" id="password" placeholder="Enter password to re-authenticate"/>
+        </div>
+        <button type="button" class="btn btn-primary" id="login">Login</button>
+        <span id="authStatus" class="ms-3 text-muted small"></span>
+    </form>
+</div>
+
+<div class="card card-body mb-3">
+    <h5 class="card-title">Flame Height</h5>
+    <div class="mb-3">
+        <label class="form-label">Show Flame Height As</label>
+        <select class="form-select" id="flameHeightAs">
+            <option value="fan">Fan</option>
+            <option value="dimmer">Dimmer Light Switch</option>
+        </select>
+    </div>
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="hideBlower"/>
+        <label class="form-check-label" for="hideBlower">Hide Flame Height Control</label>
+    </div>
+</div>
+
+<div class="card card-body mb-3">
+    <h5 class="card-title">Temperature</h5>
+    <div class="mb-3">
+        <label class="form-label">Temperature Unit</label>
+        <select class="form-select" id="temperatureUnit">
+            <option value="F">Fahrenheit (°F)</option>
+            <option value="C">Celsius (°C)</option>
+        </select>
+    </div>
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="hideThermostat"/>
+        <label class="form-check-label" for="hideThermostat">Hide Thermostat</label>
+    </div>
+</div>
+
+<div class="card card-body mb-3">
+    <h5 class="card-title">Accessories</h5>
+    <p class="text-muted small mb-3">Toggle which accessories are visible in the Home app. Your fireplace may not support all of these features.</p>
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="hidePilot"/>
+        <label class="form-check-label" for="hidePilot">Hide Pilot Mode switch</label>
+    </div>
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="hideSensor"/>
+        <label class="form-check-label" for="hideSensor">Hide Fireplace Valve sensor</label>
+    </div>
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="hideLight"/>
+        <label class="form-check-label" for="hideLight">Hide Ambient Light</label>
+    </div>
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="hideFanSpeed"/>
+        <label class="form-check-label" for="hideFanSpeed">Hide Fan Speed</label>
+    </div>
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="hideColdClimate"/>
+        <label class="form-check-label" for="hideColdClimate">Hide Cold Climate Mode</label>
+    </div>
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="hideTimer"/>
+        <label class="form-check-label" for="hideTimer">Hide Sleep Timer</label>
+    </div>
+</div>
+
+<button type="button" class="btn btn-primary w-100" id="save">Save</button>
+
+<script>
+    const optionFields = [
+        'flameHeightAs', 'temperatureUnit',
+        'hideBlower', 'hidePilot', 'hideSensor',
+        'hideLight', 'hideFanSpeed', 'hideThermostat',
+        'hideColdClimate', 'hideTimer',
+    ];
+
+    function readOptions(config) {
+        document.getElementById('flameHeightAs').value = config.flameHeightAs || 'fan';
+        document.getElementById('temperatureUnit').value = config.temperatureUnit || 'F';
+        for (const field of optionFields.filter(f => f.startsWith('hide'))) {
+            document.getElementById(field).checked = config[field] === true;
+        }
+    }
+
+    function collectOptions() {
+        return {
+            flameHeightAs: document.getElementById('flameHeightAs').value,
+            temperatureUnit: document.getElementById('temperatureUnit').value,
+            hideBlower: document.getElementById('hideBlower').checked,
+            hidePilot: document.getElementById('hidePilot').checked,
+            hideSensor: document.getElementById('hideSensor').checked,
+            hideLight: document.getElementById('hideLight').checked,
+            hideFanSpeed: document.getElementById('hideFanSpeed').checked,
+            hideThermostat: document.getElementById('hideThermostat').checked,
+            hideColdClimate: document.getElementById('hideColdClimate').checked,
+            hideTimer: document.getElementById('hideTimer').checked,
+        };
+    }
+
+    homebridge.addEventListener('ready', async () => {
+        let pluginConfig = await homebridge.getPluginConfig();
+        const current = pluginConfig[0] || {};
+
+        if (current.username) {
+            document.getElementById('username').value = current.username;
+            document.getElementById('authStatus').textContent = 'Authenticated';
+        }
+
+        readOptions(current);
+
+        document.getElementById('login').addEventListener('click', async () => {
+            const payload = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+            };
+            try {
+                const authConfig = await homebridge.request('/login', payload);
+                if (authConfig.error) {
+                    homebridge.toast.error(authConfig.error);
+                    document.getElementById('password').value = '';
+                } else {
+                    // Merge auth data with existing options — don't wipe them out
+                    const merged = {
+                        ...pluginConfig[0],
+                        ...authConfig,
+                        ...collectOptions(),
+                    };
+                    await homebridge.updatePluginConfig([merged]);
+                    await homebridge.savePluginConfig();
+                    pluginConfig[0] = merged;
+                    document.getElementById('password').value = '';
+                    document.getElementById('authStatus').textContent = 'Authenticated';
+                    homebridge.toast.success('Authenticated with Intellifire!');
+                }
+            } catch (e) {
+                homebridge.toast.error('Login request failed.');
+            }
+        });
+
+        document.getElementById('save').addEventListener('click', async () => {
+            const merged = {
+                ...pluginConfig[0],
+                ...collectOptions(),
+            };
+            await homebridge.updatePluginConfig([merged]);
+            await homebridge.savePluginConfig();
+            pluginConfig[0] = merged;
+            homebridge.toast.success('Settings saved.');
+        });
+    });
+</script>

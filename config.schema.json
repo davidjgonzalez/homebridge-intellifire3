@@ -1,0 +1,102 @@
+{
+  "pluginAlias": "Intellifire",
+  "pluginType": "platform",
+  "singular": true,
+  "customUi": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Name",
+        "required": true,
+        "default": "Intellifire"
+      },
+      "username": {
+        "title": "Username",
+        "type": "string",
+        "required": true,
+        "default": ""
+      },
+      "password": {
+        "title": "Password",
+        "type": "string",
+        "required": true,
+        "default": ""
+      },
+      "userID": {
+        "title": "User ID",
+        "type": "string",
+        "default": ""
+      },
+      "flameHeightAs": {
+        "title": "Show Flame Height As",
+        "type": "string",
+        "default": "fan",
+        "oneOf": [
+          {"title": "Fan", "enum": ["fan"]},
+          {"title": "Dimmer Light Switch", "enum": ["dimmer"]}
+        ],
+        "description": "Controls whether the flame height appears as a fan or a dimmer light switch in the Home app"
+      },
+      "temperatureUnit": {
+        "title": "Temperature Unit",
+        "type": "string",
+        "default": "F",
+        "oneOf": [
+          {"title": "Fahrenheit (°F)", "enum": ["F"]},
+          {"title": "Celsius (°C)", "enum": ["C"]}
+        ],
+        "description": "Unit used by the Intellifire API and shown in the Home app"
+      },
+      "hidePilot": {
+        "title": "Hide Pilot Mode",
+        "type": "boolean",
+        "default": false,
+        "description": "Hide the pilot mode toggle from the Home app"
+      },
+      "hideSensor": {
+        "title": "Hide Fireplace Valve Sensor",
+        "type": "boolean",
+        "default": false,
+        "description": "Hide the fireplace valve contact sensor from the Home app"
+      },
+      "hideBlower": {
+        "title": "Hide Flame Height Control",
+        "type": "boolean",
+        "default": false,
+        "description": "Hide the flame height (blower) control from the Home app"
+      },
+      "hideLight": {
+        "title": "Hide Ambient Light",
+        "type": "boolean",
+        "default": false,
+        "description": "Hide the ambient light control from the Home app"
+      },
+      "hideFanSpeed": {
+        "title": "Hide Fan Speed",
+        "type": "boolean",
+        "default": false,
+        "description": "Hide the blower fan speed control from the Home app"
+      },
+      "hideThermostat": {
+        "title": "Hide Thermostat",
+        "type": "boolean",
+        "default": false,
+        "description": "Hide the thermostat (temperature sensor + setpoint) from the Home app"
+      },
+      "hideColdClimate": {
+        "title": "Hide Cold Climate Mode",
+        "type": "boolean",
+        "default": false,
+        "description": "Hide the cold climate mode toggle from the Home app"
+      },
+      "hideTimer": {
+        "title": "Hide Sleep Timer",
+        "type": "boolean",
+        "default": false,
+        "description": "Hide the sleep timer toggle from the Home app"
+      }
+    }
+  }
+}
