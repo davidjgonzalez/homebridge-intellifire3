@@ -3,6 +3,8 @@
 
 A Homebridge plugin for Intellifire (Hearth & Home) fireplaces. Connects via the Intellifire cloud API to expose your fireplace and its features as accessories in the Apple Home app.
 
+This project is a fork, and significant update, of the (abandoned) [homebridge-intellifire2 project](https://github.com/davidashman/homebridge-intellifire2/pull/7).
+
 ![Homebridge Intellifire](README-config.jpg)
 
 
