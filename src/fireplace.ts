@@ -255,10 +255,12 @@ export class Fireplace {
           data.power === '1',
           Number(data.height),
           data.pilot === '1',
-          data.light != null ? Number(data.light) : this.states.light,
-          data.fanspeed != null ? Number(data.fanspeed) : this.states.fanSpeed,
-          data.temperature != null ? Number(data.temperature) : this.states.temperature,
-          data.setpoint != null && Number(data.setpoint) > 0 ? Number(data.setpoint) / 100 : this.states.targetTemperature,
+          data.light !== null && data.light !== undefined ? Number(data.light) : this.states.light,
+          data.fanspeed !== null && data.fanspeed !== undefined ? Number(data.fanspeed) : this.states.fanSpeed,
+          data.temperature !== null && data.temperature !== undefined ? Number(data.temperature) : this.states.temperature,
+          data.setpoint !== null && data.setpoint !== undefined && Number(data.setpoint) > 0
+            ? Number(data.setpoint) / 100
+            : this.states.targetTemperature,
           data.cold_climate_mode === '1',
           data.timer === '1',
         );
@@ -347,7 +349,9 @@ export class Fireplace {
 
     if (this.fanSpeedService) {
       this.fanSpeedService.getCharacteristic(this.platform.Characteristic.On).updateValue(this.states.fanSpeed > 0);
-      this.fanSpeedService.getCharacteristic(this.platform.Characteristic.RotationSpeed).updateValue(Math.round((this.states.fanSpeed / 6) * 100));
+      this.fanSpeedService
+        .getCharacteristic(this.platform.Characteristic.RotationSpeed)
+        .updateValue(Math.round((this.states.fanSpeed / 6) * 100));
     }
 
     this.coldClimateService?.getCharacteristic(this.platform.Characteristic.On).updateValue(this.states.coldClimate);
